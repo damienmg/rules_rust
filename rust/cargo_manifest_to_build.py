@@ -482,7 +482,7 @@ def resolve_deps(deps, ctxt):
             version=ctxt["resolved_deps"][d["name"]].replace(".", "_")
         )
         for d in deps
-        if d["name"] in ctxt["resolved_deps"]
+        if d["name"] in ctxt["resolved_deps"] and ctxt["resolved_deps"][d["name"]]
         ])
 
 def extend_context(ctxt, json):
