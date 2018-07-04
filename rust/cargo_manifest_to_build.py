@@ -405,93 +405,92 @@ def remove_path_prefix(s, prefix):
     res = s[len(prefix):] if s.startswith(prefix) else s
     return res[1:] if res.startswith("/") else res
 
-def rust_library(target, context):
-    return """rust_library(
-    name = "{name}",
-    crate_root = "{path}",
-    crate_type = "{kind}",
-    srcs = glob(["**/*.rs"]),
-    deps = [{deps}],
-    rustc_flags = [
-        "--cap-lints allow",{flags}
-    ],{other}
-    version = "{version}",
-    crate_features = [{features}],
-)""".format(
-    name=target["name"].replace("-", "_"),
-    path=remove_path_prefix(target["src_path"], context["workspace_root"]),
-    kind=target["crate_types"][0],
-    deps=context["deps"],
-    flags="".join(["\n        \"%s\"," % f for f in context["flags"]]),
-    other=context["other"],
-    version=context["version"],
-    features=",".join("\"%s\"" % f for f in context["features"]),
-)
+def bazel_object(obj):
+    return repr(obj)  # Simply relies on repr() for conversion
 
-def rust_binary(target, context):
-    return """rust_binary(
-    name = "{name}_bin",
-    crate_root = "{path}",
-    srcs = glob(["**/*.rs"]),
-    deps = [":{name}", {deps}],
-    rustc_flags = [
-        "--cap-lints allow",{flags}
-    ],{other}
-    version = "{version}",
-    crate_features = [{features}],
-)""".format(
-    name=target["name"].replace("-", "_"),
-    path=remove_path_prefix(target["src_path"], context["workspace_root"]),
-    deps=context["deps"],
-    flags="".join(["\n        \"%s\"," % f for f in context["flags"]]),
-    other=context["other"],
-    version=context["version"],
-    features=",".join("\"%s\"" % f for f in context["features"]),
-)
+def bazel_rule(rule, *args, **kwargs):
+    result = rule + "("
+    for a in args:
+        result += "%s, " % bazel_object(a)
+    for k, v in kwargs.items():
+        if v or v === False:
+            result += "%s = %s, " % (k, bazel_object(v))
+    result += ")"
 
-def custom_build_script(target, context):
-    return """rust_binary(
-    name = "{name}_build_script",
-    crate_root = "{path}",
-    srcs = glob(["**/*.rs"]),
-    deps = [{build_deps}],
-    rustc_flags = ["--cap-lints allow"],
-    version = "{version}",
-    crate_features = [{features}],
-    visibility = ["//visibility:private"],
-)
+def glob(*args, **kwargs):
+    return bazel_rule("glob", *args, **kwargs)
 
-cargo_build_script_run(
-    name = "{name}_build_script_executor",
-    srcs = glob(["*", "**/*.rs"]),
-    script = ":{name}_build_script",
-    features = [{features}],
-)
-""".format(
-    name=context["name"].replace("-", "_"),
-    path=remove_path_prefix(target["src_path"] or "build.rs", context["workspace_root"]),
-    build_deps=context["build_deps"],
-    features=",".join("\"%s\"" % f for f in context["features"]),
-    version=context["version"],
-)
+def rust_library(**kwargs):
+    return bazel_rule("rust_library", *args, **kwargs)
+
+def rust_binary(**kwargs):
+    return bazel_rule("rust_library", *args, **kwargs)
+
+def cargo_build_script_run(**kwargs):
+    return bazel_rule("cargo_build_script_run", *args, **kwargs)
+    
+def rust_library_from_context(target, context):
+    return rust_library(
+        name=target["name"].replace("-", "_"),
+        crate_root=remove_path_prefix(target["src_path"], context["workspace_root"]),
+        crate_type=target["crate_types"][0],
+        srcs = glob(["**/*.rs"]),
+        deps=context["deps"],
+        rustc_flags=["--cap-lints allow"] + context["flags"],
+        version=context["version"],
+        crate_features=context["features"],
+        **context["extra"],
+    )
+
+def rust_binary_from_context(target, context):
+    name = target["name"].replace("-", "_")
+    return rust_binary(
+        name=name + "_bin",
+        crate_root=remove_path_prefix(target["src_path"], context["workspace_root"]),
+        srcs = glob(["**/*.rs"]),
+        deps=[":" + name] + context["deps"],
+        rustc_flags=["--cap-lints allow"] + context["flags"],
+        version=context["version"],
+        crate_features=context["features"],
+        **context["extra"],
+    )
+
+def custom_build_script_from_context(target, context):
+    name = target["name"].replace("-", "_")
+    return rust_binary(
+        name=name + "_build_script",
+        crate_root=remove_path_prefix(target["src_path"] or "build.rs", context["workspace_root"]),
+        srcs = glob(["**/*.rs"]),
+        deps=context["build_deps"],
+        rustc_flags=["--cap-lints allow"],
+        version=context["version"],
+        crate_features=context["features"],
+        **context["extra"],
+    )  + "\n\n" + cargo_build_script_run(
+            name = name + "_build_script_executor",
+            srcs = glob(["*", "**/*.rs"]),
+            script = ":%s_build_script" % name,
+            crate_features = context["features"],
+    )
 
 def resolve_deps(deps, ctxt):
-    return ",".join([
-        "\"%s\"" % ctxt["dep_format"].format(
+    return [
+        ctxt["dep_format"].format(
             name=d["name"].replace("-", "_"),
             version=ctxt["resolved_deps"][d["name"]].replace(".", "_")
         )
         for d in deps
         if d["name"] in ctxt["resolved_deps"] and ctxt["resolved_deps"][d["name"]]
-        ])
+    ]
 
 def extend_context(ctxt, json):
     out_dir_tar = ""
+    other = {}
     if any([t["kind"] == ["custom-build"]] for t in json["targets"]):
-        out_dir_tar = "\n    out_dir_tar = \":%s_build_script_executor\"," % json["name"].replace("-", "_")
+        other["out_dir_tar"] = ":%s_build_script_executor" % json["name"].replace("-", "_")
     data = ""
     if ctxt["data"]:
-        data = "\n    data = r\"\"\"%s\"\"\"," % ctxt["data"]
+        other["data"] = ctxt["data"]
     for d in json["dependencies"]:
         if d["name"] not in ctxt["resolved_deps"]:
             sys.stderr.write("WARNING: Cannot resolve dependency on crate '%s'\n" % d["name"])
@@ -500,7 +499,7 @@ def extend_context(ctxt, json):
         "workspace_root": ctxt["workspace_root"],
         "flags": ctxt["flags"],
         "version": json["version"],
-        "other": "%s%s" % (out_dir_tar, data),
+        "extra": extra,
         "deps": resolve_deps([d for d in json["dependencies"] if not d["kind"]], ctxt),
         "build_deps": resolve_deps([d for d in json["dependencies"] if d["kind"] == "build"], ctxt),
         "features": json["features"].keys(),
@@ -527,11 +526,11 @@ load(
     context = extend_context(ctxt, json)
     for target in json["targets"]:
         if target["kind"][0] in ["lib", "proc-macro", "dylib", "rlib"]:
-            result.append(rust_library(target, context))
+            result.append(rust_library_from_context(target, context))
         elif target["kind"][0] == "bin":
-            result.append(rust_binary(target, context))
+            result.append(rust_binary_from_context(target, context))
         elif target["kind"][0] == "custom-build":
-            result.append(custom_build_script(target, context))
+            result.append(custom_build_script_from_context(target, context))
         else:
             result.append("# Unsupported target %s with type %s omitted" % (target["name"], target["kind"][0]))
     return "\n\n".join(result)
