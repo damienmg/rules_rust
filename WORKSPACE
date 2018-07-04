@@ -43,3 +43,7 @@ git_repository(
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 
 skydoc_repositories()
+
+load("//rust:cargo_lock_to_bzl.bzl", "cargo_lock_deps")
+
+cargo_lock_deps()

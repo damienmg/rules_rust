@@ -89,12 +89,14 @@ def _dns_to_workspace(repository):
     return "_".join(reversed(_split(repository)))
 
 def cargo_crate(name, version, **kwargs):
-    crate_repository(
-        name = "io_crates_%s__%s" % (
-            name.replace("-", "_"),
-            version.replace(".", "_"),
-        ),
-        crate_version = version,
-        crate_name = name,
-        **kwargs
+    n = "io_crates_%s__%s" % (
+        name.replace("-", "_"),
+        version.replace(".", "_"),
     )
+    if not native.existing_rule(n):
+        crate_repository(
+            name = n,
+            crate_version = version,
+            crate_name = name,
+            **kwargs
+        )
