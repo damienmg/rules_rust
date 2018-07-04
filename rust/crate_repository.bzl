@@ -59,6 +59,8 @@ def _impl(rctx):
     ]
     if rctx.attr.data:
         args.append("--data=" + rctx.attr.data)
+    for dep in rctx.attr.additional_deps:
+        args.append("--additional_dep=" + dep)
     result = rctx.execute(args)
     if result.stderr:
         print(result.stderr)
@@ -69,6 +71,7 @@ crate_repository = repository_rule(
         "crate_name": attr.string(mandatory = True),
         "crate_version": attr.string(mandatory = True),
         "locked_deps": attr.string_dict(),
+        "additional_deps": attr.string_list([]),
         "flags": attr.string_list(),
         "data": attr.string(),
         "sha256": attr.string(),

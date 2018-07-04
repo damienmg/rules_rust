@@ -18,6 +18,8 @@ parser.add_argument('--output',
                     type=argparse.FileType('w'),
                     default=sys.stdout,
                     help='output file')
+parser.add_argument('--additional_dep', action='append', default=[],
+                    help='Extra dependency for compilation')
 
 LICENSE_TYPES = {
     "AFL-2.1": "notice",
@@ -500,7 +502,7 @@ def extend_context(ctxt, json):
         "flags": ctxt["flags"],
         "version": json["version"],
         "extra": extra,
-        "deps": resolve_deps([d for d in json["dependencies"] if not d["kind"]], ctxt),
+        "deps": resolve_deps([d for d in json["dependencies"] if not d["kind"]], ctxt) + ctxt["additional_deps"],
         "build_deps": resolve_deps([d for d in json["dependencies"] if d["kind"] == "build"], ctxt),
         "features": json["features"].keys(),
     }
@@ -542,6 +544,7 @@ def parse_args_and_build_context(json):
         "data": args.data,
         "dep_format": args.dep_format,
         "resolved_deps": {v.split("=", 1)[0]: v.split("=", 1)[1] for v in args.dep},
+        "additional_deps": args.additional_dep,
         "output": args.output,
         "flags": args.flag or [],
     }
