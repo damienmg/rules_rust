@@ -15,7 +15,7 @@ def _build_script_impl(ctx):
     ctx.actions.run_shell(
         command = "%s >/dev/null" % ctx.executable.script.path,
         outputs = [out_dir],
-        inputs = ctx.files.srcs + [ctx.executable.script],
+        inputs = ctx.files.srcs + [ctx.executable.script, toolchain.rustc],
         mnemonic = "CargoBuildScript",
         env = env,
     )
@@ -30,6 +30,8 @@ cargo_build_script_run = rule(
     attrs = {
         "script": attr.label(
             executable = True,
+            allow_files = True,
+            mandatory = True,
             cfg = "host",
         ),
         "crate_features": attr.string_list(),
@@ -65,20 +67,22 @@ def _impl(rctx):
     for dep in rctx.attr.additional_deps:
         args.append("--additional_dep=" + dep)
     result = rctx.execute(args)
-    if result.stderr:
-        print(result.stderr)
+    if result.stderr or result.stdout or result.return_code != 0:
+        print("Resolving %s:" % rctx.attr.name)
+        print("%s%s" % (result.stdout, result.stderr))
+        print("Running %s" % args)
 
 crate_repository = repository_rule(
     _impl,
     attrs = {
         "crate_name": attr.string(mandatory = True),
         "crate_version": attr.string(mandatory = True),
-        "locked_deps": attr.string_dict(),
-        "additional_deps": attr.string_list([]),
-        "flags": attr.string_list(),
+        "locked_deps": attr.string_dict(default={}),
+        "additional_deps": attr.string_list(default=[]),
+        "flags": attr.string_list(default=[]),
         "data": attr.string(),
         "sha256": attr.string(),
-        "_tool": attr.label(default = "//rust:cargo_manifest_to_build.py"),
+        "_tool": attr.label(default = "//cargo:cargo_manifest_to_build.py"),
     },
 )
 
@@ -146,7 +150,7 @@ def cargo_crate(name, version, locked_deps={}, **kwargs):
     locked_deps = {
         k: "@io_crates_{name}__{version}//:{name}".format(
             name=k.replace("-", "_"),
-            version=v.replace("-", "_")
+            version=v.replace(".", "_")
         )
         for k, v in locked_deps.items()
     }
@@ -155,5 +159,6 @@ def cargo_crate(name, version, locked_deps={}, **kwargs):
             name = n,
             crate_version = version,
             crate_name = name,
+            locked_deps = locked_deps,
             **kwargs
         )
