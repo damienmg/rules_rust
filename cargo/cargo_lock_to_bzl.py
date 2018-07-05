@@ -40,7 +40,7 @@ def cargo_crate(**kwargs):
 def lock_to_bzl(fin, fout, name, ctxt):
     lock_file = pytoml.load(fin)
     fout.write("""
-load("@io_bazel_rules_rust//rust:crate_repository.bzl", "cargo_crate")
+load("@io_bazel_rules_rust//cargo:crate_repository.bzl", "cargo_crate")
 
 def %s():""" % name)
     for p in lock_file["package"]:

@@ -37,13 +37,24 @@ def _import_cargo_lockfiles(rctx):
     if result.stderr:
         print(result.stderr)
 
+import_cargo_lockfiles = repository_rule(
+    _import_cargo_lockfiles,
+    attrs = {
+        "lockfiles": attr.label_list(mandatory = True),
+        "additional_deps": attr.string_list_dict(),
+        "additional_flags": attr.string_list_dict(),
+        "skipped_deps": attr.string_list_dict(),
+        "_tool": attr.label(default = "//rust:cargo_lock_to_bzl.py"),
+        "_tool_deps": attr.label_list(default = ["@com_github_avakar_pytoml//:BUILD.bazel"]),
+    },
+)
 
 """Import dependencies declared in one or multiple cargo lockfiles
 
 To use, simply generate the lockfile with `cargo generate-lockfile` then refer to it from the WORKSPACE file:
 ```
 # Load dependencies
-load("//rust:cargo_lock_to_bzl.bzl", "cargo_lock_deps", "import_cargo_lockfiles")
+load("@io_bazel_rules_rust//cargo:cargo_lock_to_bzl.bzl", "cargo_lock_deps", "import_cargo_lockfiles")
 cargo_lock_deps()
 
 # Import the lockfile
@@ -63,14 +74,3 @@ Paramters:
   additional_flags: dictionary from crate (<name>-<version>) to flag to pass to the given crate.
   skipped_deps: dictionary from crate (<name>-<version>) to crate dependencies (<name>-<version>) to skip on the given crate.
 """
-import_cargo_lockfiles = repository_rule(
-    _import_cargo_lockfiles,
-    attrs = {
-        "lockfiles": attr.label_list(mandatory = True),
-        "additional_deps": attr.string_list_dict(),
-        "additional_flags": attr.string_list_dict(),
-        "skipped_deps": attr.string_list_dict(),
-        "_tool": attr.label(default = "//rust:cargo_lock_to_bzl.py"),
-        "_tool_deps": attr.label_list(default = ["@com_github_avakar_pytoml//:BUILD.bazel"]),
-    },
-)

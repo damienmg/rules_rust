@@ -28,7 +28,10 @@ def _build_script_impl(ctx):
 cargo_build_script_run = rule(
     _build_script_impl,
     attrs = {
-        "script": attr.label(executable = True, cfg = "host"),
+        "script": attr.label(
+            executable = True,
+            cfg = "host",
+        ),
         "crate_features": attr.string_list(),
         "srcs": attr.label_list(allow_files = True),
     },
