@@ -8,8 +8,6 @@ import StringIO
 parser = argparse.ArgumentParser()
 parser.add_argument('dep', nargs='*',
                     help='List of dep_name=dep_version resolved versions')
-parser.add_argument('--dep_format', default='@io_crates_{name}__{version}//:{name}',
-                    help='How to format a dependency')
 parser.add_argument('--data', required=False,
                     help='Content of the data file')
 parser.add_argument('--flag', action='append', default=[],
@@ -477,10 +475,7 @@ def custom_build_script_from_context(target, context):
 
 def resolve_deps(deps, ctxt):
     return [
-        ctxt["dep_format"].format(
-            name=d["name"].replace("-", "_"),
-            version=ctxt["resolved_deps"][d["name"]].replace(".", "_")
-        )
+        ctxt["resolved_deps"][d["name"]]
         for d in deps
         if d["name"] in ctxt["resolved_deps"] and ctxt["resolved_deps"][d["name"]]
     ]
@@ -542,7 +537,6 @@ def parse_args_and_build_context(json):
     ctxt = {
         "workspace_root": json["workspace_root"],
         "data": args.data,
-        "dep_format": args.dep_format,
         "resolved_deps": {v.split("=", 1)[0]: v.split("=", 1)[1] for v in args.dep},
         "additional_deps": args.additional_dep,
         "output": args.output,
