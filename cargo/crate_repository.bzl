@@ -46,6 +46,9 @@ def _impl(rctx):
         "name": rctx.attr.crate_name,
         "version": rctx.attr.crate_version,
     }
+    # Enforce dependencies on the tool dependencies
+    for dep in rctx.attr._tool_deps:
+        rctx.path(dep)
     rctx.download_and_extract(
         url = "https://crates-io.s3-us-west-1.amazonaws.com/crates/{name}/{name}-{version}.crate".format(**kwargs),
         sha256 = rctx.attr.sha256,
@@ -83,6 +86,11 @@ crate_repository = repository_rule(
         "data": attr.string(),
         "sha256": attr.string(),
         "_tool": attr.label(default = "//cargo:cargo_manifest_to_build.py"),
+        # Declare dependencies of this repository rules to all the python deps.
+        "_tool_deps": attr.label_list(default = [
+            "//cargo:bazel_rust_helper.py",
+            "//cargo:cargo_licenses.py",
+        ])
     },
 )
 
