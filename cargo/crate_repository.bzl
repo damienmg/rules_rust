@@ -90,6 +90,7 @@ crate_repository = repository_rule(
         "_tool_deps": attr.label_list(default = [
             "//cargo:bazel_rust_helper.py",
             "//cargo:cargo_licenses.py",
+            "//cargo:cargo_features.py",
         ])
     },
 )

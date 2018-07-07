@@ -9,8 +9,8 @@ py_binary(
 py_binary(
     name = "cargo_manifest_to_build",
     srcs = [
-        "cargo_manifest_to_build.py",
-        "cargo_licenses.py",
         "bazel_rust_helper.py",
+        "cargo_licenses.py",
+        "cargo_manifest_to_build.py",
     ],
 )

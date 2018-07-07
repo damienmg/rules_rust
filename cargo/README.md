@@ -137,8 +137,12 @@ cargo_repository(
       <td><code>locked_deps</code></td>
       <td>
         <code>Dictionary of strings, optional</code>
-        <p>Map from dependency name to labels for resolving dependencies.
-           Use an empty string as label to ignore a dependency.</p>
+        <p>Map from dependency name to labels for resolving dependencies. Each
+           dependency is expected to have several versions of itself for several
+           feature combinaison it support where the target supporting feature
+           <code>a</code> and <code>b</code> would be <code>label@a+b</code>.
+        </p>
+        <p>Use an empty string as label to ignore a dependency.</p>
       </td>
     </tr>
     <tr>

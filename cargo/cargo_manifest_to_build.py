@@ -8,6 +8,7 @@ import StringIO
 sys.dont_write_bytecode = True
 
 from bazel_rust_helper import BazelBuildFile, glob
+from cargo_features import FeatureGraph
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -36,6 +37,14 @@ def rule_name(name):
     return name.encode("UTF-8").replace("-", "_")
 
 
+def dep_name(resolved_deps, dep):
+    rdep = resolved_deps[dep["name"]].encode("UTF-8")
+    feat = [d.encode("UTF-8") for d in dep["features"]]
+    if dep["uses_default_features"]:
+        feat.append("default")
+    return "%s@%s" % (rdep, "+".join(sorted(feat)))
+
+
 class CargoTomlContext:
     """Utility to convert Cargo.toml file to a BUILD file."""
 
@@ -58,10 +67,10 @@ class CargoTomlContext:
         out_dir_tar = ""
         self.extra = {}
         self.package = json["packages"][0]
+        self.out_dir_tar = None
         if any(t["kind"] == ["custom-build"] for t in self.package["targets"]):
-            self.extra[
-                "out_dir_tar"] = ":%s_build_script_executor" % self.package[
-                    "name"].encode("UTF-8").replace("-", "_")
+            self.out_dir_tar = ":%s_build_script_executor" % rule_name(
+                self.package["name"])
         if args.data:
             self.extra["data"] = args.data
         for d in self.package["dependencies"]:
@@ -76,12 +85,12 @@ class CargoTomlContext:
              if not d["kind"]]) + self.additional_deps
         self.build_deps = self.resolve_deps(
             [d for d in self.package["dependencies"] if d["kind"] == "build"])
-        # TODO(damienmg): features
-
+        self.features = FeatureGraph.from_json(
+            self.package["features"]).resolve(self.resolved_deps)
 
     def resolve_deps(self, deps):
         return [
-            self.resolved_deps[d["name"]].encode("UTF-8") for d in deps
+            dep_name(self.resolved_deps, d) for d in deps
             if d["name"] in self.resolved_deps
             and self.resolved_deps[d["name"]]
         ]
@@ -93,47 +102,58 @@ class CargoTomlContext:
 
     def library(self, target):
         name = rule_name(target["name"])
-        self.build_file.rust_library(
-            name=name,
-            crate_root=self.remove_workspace_prefix(target["src_path"].encode("UTF-8")),
-            crate_type=target["crate_types"][0].encode("UTF-8"),
-            srcs=glob(["**/*.rs"]),
-            deps=self.deps,
-            rustc_flags=["--cap-lints allow"] + self.flags,
-            version=self.version,
-            # TODO(damienmg): crate_features=features,
-            **self.extra)
-
+        self.features.forall(lambda n, features:
+            self.build_file.rust_library(
+                name="%s@%s" % (name, n),
+                crate_root=self.remove_workspace_prefix(
+                    target["src_path"].encode("UTF-8")),
+                crate_type=target["crate_types"][0].encode("UTF-8"),
+                srcs=glob(["**/*.rs"]),
+                deps=self.deps,
+                rustc_flags=["--cap-lints allow"] + self.flags,
+                version=self.version,
+                crate_features=features,
+                out_dir_tar=("%s@%s" % (self.out_dir_tar, n)) if self.out_dir_tar else None,
+                **self.extra))
+        if self.features.has("default"):
+            self.build_file.alias(name, "%s@default" % name)
 
     def binary(self, target):
-        name = rule_name(target["name"])
+        name = rule_name(self.name)
         bin_name = rule_name(target["name"] + "_bin")
-        self.build_file.rust_binary(
-            name=bin_name,
-            crate_root=self.remove_workspace_prefix(target["src_path"].encode("UTF-8")),
-            srcs=glob(["**/*.rs"]),
-            deps=[":" + name] + self.deps,
-            rustc_flags=["--cap-lints allow"] + self.flags,
-            version=self.version,
-            # TODO(damienmg): crate_features=features,
-            **self.extra)
+        self.features.forall(lambda n, features:
+            self.build_file.rust_binary(
+                name="%s@%s" % (bin_name, n),
+                crate_root=self.remove_workspace_prefix(
+                    target["src_path"].encode("UTF-8")),
+                srcs=glob(["**/*.rs"]),
+                deps=[":%s@%s" % (name, n)] + self.deps,
+                rustc_flags=["--cap-lints allow"] + self.flags,
+                version=self.version,
+                crate_features=features,
+                out_dir_tar=("%s@%s" % (self.out_dir_tar, n)) if self.out_dir_tar else None,
+                **self.extra))
+        if self.features.has("default"):
+            self.build_file.alias(bin_name, "%s@default" % bin_name)
 
     def build_script(self, target):
         name = rule_name(self.name)
-        self.build_file.rust_binary(
-            name=name + "_build_script",
-            crate_root=self.remove_workspace_prefix(target["src_path"].encode("UTF-8")
-                                        or "build.rs"),
-            srcs=glob(["**/*.rs"]),
-            deps=self.build_deps,
-            rustc_flags=["--cap-lints allow"],
-            # TODO(damienmg): crate_features=features,
-            version=self.version)
-        self.build_file.cargo_build_script_run(
-            name=name + "_build_script_executor",
-            srcs=glob(["*", "**/*.rs"]),
-            # TODO(damienmg): crate_features=features,
-            script=":%s_build_script" % name)
+        self.features.forall(lambda n, features:
+            self.build_file.rust_binary(
+                name="%s_build_script@%s" % (name, n),
+                crate_root=self.remove_workspace_prefix(
+                    target["src_path"].encode("UTF-8") or "build.rs"),
+                srcs=glob(["**/*.rs"]),
+                deps=self.build_deps,
+                rustc_flags=["--cap-lints allow"],
+                crate_features=features,
+                version=self.version))
+        self.features.forall(lambda n, features:
+            self.build_file.cargo_build_script_run(
+                name="%s_build_script_executor@%s" % (name, n),
+                srcs=glob(["*", "**/*.rs"]),
+                crate_features=features,
+                script=":%s_build_script@%s" % (name, n)))
 
     def to_build_file(self):
         self.build_file = BazelBuildFile()
@@ -156,9 +176,17 @@ class CargoTomlContext:
                 self.build_file.comment(
                     "Unsupported target %s with type %s omitted" %
                     (target["name"], target["kind"][0]))
+        # Add aliases if the libname is different from the crate name
         if aliased and aliased is not True:
-            self.build_file.alias(context["name"].replace("-", "_"), aliased)
+            name = rule_name(self.name)
+            self.features.forall(lambda n, features:
+                self.build_file.alias("%s@%s" % (name, n), "%s@%s" % (aliased, n))
+            )
+            if self.features.has("default"):
+                self.build_file.alias(name, aliased)
+
         return str(self.build_file)
+
 
 if __name__ == "__main__":
     args = parser.parse_args()
