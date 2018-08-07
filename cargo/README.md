@@ -72,6 +72,15 @@ a macro `cargo_lockfile_aliases` is also declared in
       </td>
     </tr>
     <tr>
+      <td><code>feature_groups</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>List of feature groups to generate.
+        A feature group is a "+" separated list of features that will
+        be needed from that crate.</p>
+      </td>
+    </tr>
+    <tr>
       <td><code>skipped_deps</code></td>
       <td>
         <code>Dictionary of string lists, optional</code>
@@ -150,6 +159,15 @@ cargo_repository(
       <td>
         <code>List of strings, optional</code>
         <p>Additional dependencies (labels) to inject to the crate dependencies.</p>
+      </td>
+    </tr>
+    <tr>
+      <td><code>feature_groups</code></td>
+      <td>
+        <code>List of strings, optional</code>
+        <p>List of feature groups to generate.
+        A feature group is a "+" separated list of features that will
+        be needed from that crate.</p>
       </td>
     </tr>
     <tr>

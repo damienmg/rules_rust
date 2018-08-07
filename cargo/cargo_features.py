@@ -133,10 +133,25 @@ class FeatureGraph:
         else:
             raise ValueError("Can only multiply a FeatureGraph with another FeatureGraph or a Feature")
 
-    def generate_combinaisions(self):
-        """Generate all possible feature combinaisions."""
+    def generate_combination(self, features):
+        r = Feature("")
+        for f in features:
+            if f not in self.features:
+                return None
+            r += self.features[f]
+        return r
+
+    def generate_combinations(self, groups=None):
+        """Generate all possible feature combinations."""
         result = None
-        if len(self.features) < 8:
+        if groups is not None:
+            # We have the list of feature combinations we need.
+            result = FeatureGraph(self.features)
+            for f in groups:
+                add = self.get_combination(f.split("+"))
+                if add:
+                    result.extend(add)
+        elif len(self.features) < 8:
             # If we have less than 8 features we can generate all the combinaison (5040).
             result = self * self
         else:
@@ -157,13 +172,13 @@ class FeatureGraph:
             result.features[""] = Feature([])
         return result
 
-    def resolve(self, resolved_deps):
+    def resolve(self, resolved_deps, groups=None):
         """Resolve the current object into the actual list of possible feature combinations."""
         copy = FeatureGraph(self.features)
         copy.flatten()
         copy.filter_on_available_deps(resolved_deps)
         copy.remove_features_with_missing_features()
-        return copy.generate_combinaisions()
+        return copy.generate_combinations(groups)
 
     def forall(self, fn):
         for k, v in self.features.iteritems():

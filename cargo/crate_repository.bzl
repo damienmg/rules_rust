@@ -64,6 +64,9 @@ def _impl(rctx):
     ] + [
         "--flag=" + f
         for f in rctx.attr.flags
+    ] + [
+        "--feature_group=" + f
+        for f in rctx.attr.feature_group
     ]
     if rctx.attr.data:
         args.append("--data=" + rctx.attr.data)
@@ -82,6 +85,7 @@ crate_repository = repository_rule(
         "crate_version": attr.string(mandatory = True),
         "locked_deps": attr.string_dict(default={}),
         "additional_deps": attr.string_list(default=[]),
+        "feature_groups": attr.string_list(default=[]),
         "flags": attr.string_list(default=[]),
         "data": attr.string(),
         "sha256": attr.string(),
@@ -105,6 +109,7 @@ cargo_repository(
   crate_name = "ansi_term",  # The crate name
   crate_version = "0.11.0",  # The crate version
   locked_deps = {"winapi": "@io_crates_winapi__0_3_5//:winapi"},
+  feature_groups = ["default+binary"],  # Generate a target with the features "default+binary"
 )
 ```
 
@@ -113,6 +118,8 @@ Arguments:
     crate_version: the version of the crate to download
     locked_deps: map from dependency name to labels for resolving dependency. Use an empty string to remove a dependency.
     additional_deps: additional dependencies (labels) to inject to the crate.
+    feature_groups: list of feature groups to generate. A feature group is a "+" separated list of features that will
+      be needed from that crate.
     flags: additional flags to pass to rustc for compiling this crate.
     data: string content for the data attribute to inject in the build file.
     sha256: SHA-256 of the crate archive, if included, it improve performance, notably caching.
@@ -148,6 +155,8 @@ def cargo_crate(name, version, locked_deps={}, **kwargs):
           Use an empty string to remove a dependency. The crate is then expected to be available at
           `@io_crates_<name>__<version>//:<name>`.
         additional_deps: additional dependencies (labels) to inject to the crate.
+        feature_groups: list of feature groups to generate. A feature group is a "+" separated list of features that will
+          be needed from that crate.
         flags: additional flags to pass to rustc for compiling this crate.
         data: string content for the data attribute to inject in the build file.
         sha256: SHA-256 of the crate archive, if included, it improve performance, notably caching.

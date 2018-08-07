@@ -31,7 +31,11 @@ parser.add_argument(
     help='Extra dependency for compilation')
 parser.add_argument(
     '--manifest_path', default='Cargo.toml', help='Path to Cargo.toml')
-
+parser.add_argument(
+    '--feature_group',
+    action='append',
+    default=[],
+    help='List of features to generate')
 
 def rule_name(name):
     return name.encode("UTF-8").replace("-", "_")
