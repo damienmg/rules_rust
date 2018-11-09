@@ -135,7 +135,7 @@ def _setup_deps(deps, name, working_dir, toolchain,
       transitive_dylibs += dep.transitive_dylibs
       transitive_staticlibs += dep.transitive_staticlibs
 
-      link_flags += ["--extern " + dep.label.name + "=" + deps_dir + "/" + dep.rust_lib.basename]
+      link_flags += ["--extern " + dep.label.name.split("@", 1)[0] + "=" + deps_dir + "/" + dep.rust_lib.basename]
     elif hasattr(dep, "cc"):
       # This dependency is a cc_library
       if not allow_cc_deps:
@@ -206,7 +206,7 @@ def _determine_lib_name(name, crate_type, toolchain, lib_hash=""):
          + "please file an issue!") % crate_type)
 
 
-  return "lib{name}-{lib_hash}{extension}".format(name=name,
+  return "lib{name}-{lib_hash}{extension}".format(name=name.split("@", 1)[0],
                                                   lib_hash=lib_hash,
                                                   extension=extension)
 
@@ -235,7 +235,7 @@ def _rust_library_impl(ctx):
                                       ctx.attr.crate_type,
                                       toolchain,
                                       output_hash)
-  rust_lib = ctx.actions.declare_file(rust_lib_name)
+  rust_lib = ctx.actions.declare_file("%s/%s" % (ctx.label.name, rust_lib_name))
   output_dir = rust_lib.dirname
 
   # Dependencies
@@ -249,7 +249,7 @@ def _rust_library_impl(ctx):
   cmd = build_rustc_command(
       ctx = ctx,
       toolchain = toolchain,
-      crate_name = ctx.label.name,
+      crate_name = ctx.label.name.split("@", 1)[0],
       crate_type = ctx.attr.crate_type,
       src = lib_rs,
       output_dir = output_dir,
@@ -310,10 +310,11 @@ def _rust_binary_impl(ctx):
   # Build rustc command.
   cmd = build_rustc_command(ctx = ctx,
                              toolchain = toolchain,
-                             crate_name = ctx.label.name,
+                             crate_name = ctx.label.name.split("@", 1)[0],
                              crate_type = "bin",
                              src = main_rs,
                              output_dir = output_dir,
+                             output_file = rust_binary.path,
                              depinfo = depinfo)
 
   # Compile action.
@@ -385,7 +386,7 @@ def _rust_test_common(ctx, test_binary):
 
   cmd = build_rustc_command(ctx = ctx,
                              toolchain = toolchain,
-                             crate_name = test_binary.basename,
+                             crate_name = test_binary.basename.split("@", 1)[0],
                              crate_type = target.crate_type,
                              src = target.crate_root,
                              output_dir = output_dir,

@@ -183,11 +183,12 @@ class CargoTomlContext:
         # Add aliases if the libname is different from the crate name
         if aliased and aliased is not True:
             name = rule_name(self.name)
-            self.features.forall(lambda n, features:
-                self.build_file.alias("%s@%s" % (name, n), "%s@%s" % (aliased, n))
-            )
-            if self.features.has("default"):
-                self.build_file.alias(name, aliased)
+            if aliased != name:
+                self.features.forall(lambda n, features:
+                    self.build_file.alias("%s@%s" % (name, n), "%s@%s" % (aliased, n))
+                )
+                if self.features.has("default"):
+                    self.build_file.alias(name, aliased)
 
         return str(self.build_file)
 

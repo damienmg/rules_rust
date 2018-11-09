@@ -148,9 +148,10 @@ class FeatureGraph:
             # We have the list of feature combinations we need.
             result = FeatureGraph(self.features)
             for f in groups:
-                add = self.get_combination(f.split("+"))
-                if add:
-                    result.extend(add)
+                if f not in result.features:
+                    add = self.generate_combination(f.split("+"))
+                    if add:
+                        result.features[f] = add
         elif len(self.features) < 8:
             # If we have less than 8 features we can generate all the combinaison (5040).
             result = self * self

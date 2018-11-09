@@ -66,7 +66,7 @@ def _impl(rctx):
         for f in rctx.attr.flags
     ] + [
         "--feature_group=" + f
-        for f in rctx.attr.feature_group
+        for f in rctx.attr.feature_groups
     ]
     if rctx.attr.data:
         args.append("--data=" + rctx.attr.data)
@@ -77,6 +77,8 @@ def _impl(rctx):
         print("Resolving %s:" % rctx.attr.name)
         print("%s%s" % (result.stdout, result.stderr))
         print("Running %s" % args)
+        if result.return_code != 0:
+            fail("Failed with returned code %s" % result.return_code)
 
 crate_repository = repository_rule(
     _impl,

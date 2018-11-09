@@ -20,7 +20,7 @@ def _get_rustc_env(ctx):
     "CARGO_PKG_VERSION_PATCH=" + v3,
     "CARGO_PKG_VERSION_PRE=" + pre,
     "CARGO_PKG_AUTHORS=",
-    "CARGO_PKG_NAME=" + ctx.label.name,
+    "CARGO_PKG_NAME=" + ctx.label.name.split("@", 1)[0],
     "CARGO_PKG_DESCRIPTION=",
     "CARGO_PKG_HOMEPAGE=",
   ]
@@ -34,7 +34,7 @@ def _get_comp_mode_codegen_opts(ctx, toolchain):
 
 # Utility methods that use the toolchain provider.
 def build_rustc_command(ctx, toolchain, crate_name, crate_type, src, output_dir,
-                         depinfo, output_hash=None, rust_flags=[]):
+                         depinfo, output_hash=None, rust_flags=[], output_file=None):
   """
   Constructs the rustc command used to build the current target.
   """
@@ -85,11 +85,11 @@ def build_rustc_command(ctx, toolchain, crate_name, crate_type, src, output_dir,
           "--codegen ar=%s" % ar,
           "--codegen linker=%s" % cc,
           "--codegen link-args='%s'" % ' '.join(cpp_fragment.link_options),
-          "--out-dir %s" % output_dir,
           "--emit=dep-info,link",
           "--color always",
       ] +
       ["--codegen link-arg='-Wl,-rpath={}'".format(rpath) for rpath in rpaths] +
+      (["-o %s" % output_file] if output_file else ["--out-dir %s" % output_dir]) +
       features_flags +
       rust_flags +
       ["-L all=%s" % dir for dir in _get_dir_names(toolchain.rust_lib)] +
