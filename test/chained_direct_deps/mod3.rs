@@ -18,11 +18,11 @@ pub fn greet_default() {
 ///
 /// ```rust
 /// # assert!(
-///   am_i_the_world("world") == true
-/// #)
+///   mod3::am_i_the_world("world") == true
+/// #);
 /// # assert!(
-///   am_i_the_world("myself") == false
-/// #)
+///   mod3::am_i_the_world("myself") == false
+/// #);
 /// ```
 pub fn am_i_the_world(me: &str) -> bool {
     return me == mod1::world();
