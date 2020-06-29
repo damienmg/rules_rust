@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -26,10 +26,7 @@ load(
 
 rust_library(
     name = "tokio_uds",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__bytes__0_4_12//:bytes",
         "@raze__futures__0_1_29//:futures",
@@ -41,6 +38,9 @@ rust_library(
         "@raze__tokio_core__0_1_17//:tokio_core",
         "@raze__tokio_io__0_1_13//:tokio_io",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "Apache-2.0,MIT"
+  "notice", # Apache-2.0 from expression "Apache-2.0 OR MIT"
 ])
 
 load(
@@ -26,12 +26,12 @@ load(
 
 rust_library(
     name = "fnv",
-    crate_root = "lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

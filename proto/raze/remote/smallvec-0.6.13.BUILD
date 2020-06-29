@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -27,13 +27,13 @@ load(
 
 rust_library(
     name = "smallvec",
-    crate_root = "lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__maybe_uninit__2_0_0//:maybe_uninit",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

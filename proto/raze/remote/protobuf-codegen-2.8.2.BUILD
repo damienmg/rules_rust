@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -27,14 +27,14 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_protobuf_bin_gen_rust_do_not_use",
-    crate_root = "src/bin/protobuf-bin-gen-rust-do-not-use.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":protobuf_codegen",
         "@raze__protobuf__2_8_2//:protobuf",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/bin/protobuf-bin-gen-rust-do-not-use.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -46,13 +46,13 @@ rust_binary(
 
 rust_library(
     name = "protobuf_codegen",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__protobuf__2_8_2//:protobuf",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -65,14 +65,14 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_protoc_gen_rust",
-    crate_root = "src/bin/protoc-gen-rust.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":protobuf_codegen",
         "@raze__protobuf__2_8_2//:protobuf",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/bin/protoc-gen-rust.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

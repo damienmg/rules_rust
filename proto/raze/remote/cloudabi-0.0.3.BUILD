@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "restricted", # "BSD-2-Clause"
+  "restricted", # BSD-2-Clause from expression "BSD-2-Clause"
 ])
 
 load(
@@ -26,13 +26,13 @@ load(
 
 rust_library(
     name = "cloudabi",
-    crate_root = "cloudabi.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__bitflags__1_2_1//:bitflags",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "cloudabi.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

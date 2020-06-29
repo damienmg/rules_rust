@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT,Apache-2.0"
+  "notice", # MIT from expression "MIT OR Apache-2.0"
 ])
 
 load(
@@ -26,14 +26,14 @@ load(
 
 rust_library(
     name = "grpc_compiler",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__protobuf__2_8_2//:protobuf",
         "@raze__protobuf_codegen__2_8_2//:protobuf_codegen",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
@@ -46,15 +46,15 @@ rust_binary(
     # Prefix bin name to disambiguate from (probable) collision with lib name
     # N.B.: The exact form of this is subject to change.
     name = "cargo_bin_protoc_gen_rust_grpc",
-    crate_root = "src/bin/protoc-gen-rust-grpc.rs",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         # Binaries get an implicit dependency on their crate's lib
         ":grpc_compiler",
         "@raze__protobuf__2_8_2//:protobuf",
         "@raze__protobuf_codegen__2_8_2//:protobuf_codegen",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/bin/protoc-gen-rust-grpc.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

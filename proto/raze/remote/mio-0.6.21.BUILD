@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -27,10 +27,7 @@ load(
 
 rust_library(
     name = "mio",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__cfg_if__0_1_10//:cfg_if",
         "@raze__iovec__0_1_4//:iovec",
@@ -39,6 +36,9 @@ rust_library(
         "@raze__net2__0_2_33//:net2",
         "@raze__slab__0_4_2//:slab",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

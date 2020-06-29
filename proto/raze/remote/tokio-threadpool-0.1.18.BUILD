@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -34,10 +34,7 @@ load(
 
 rust_library(
     name = "tokio_threadpool",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__crossbeam_deque__0_7_3//:crossbeam_deque",
         "@raze__crossbeam_queue__0_2_1//:crossbeam_queue",
@@ -49,6 +46,9 @@ rust_library(
         "@raze__slab__0_4_2//:slab",
         "@raze__tokio_executor__0_1_10//:tokio_executor",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

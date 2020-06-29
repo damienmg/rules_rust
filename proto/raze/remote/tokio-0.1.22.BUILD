@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -50,10 +50,7 @@ load(
 
 rust_library(
     name = "tokio",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__bytes__0_4_12//:bytes",
         "@raze__futures__0_1_29//:futures",
@@ -72,6 +69,9 @@ rust_library(
         "@raze__tokio_udp__0_1_6//:tokio_udp",
         "@raze__tokio_uds__0_2_6//:tokio_uds",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

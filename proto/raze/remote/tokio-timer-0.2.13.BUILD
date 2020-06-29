@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
+  "notice", # MIT from expression "MIT"
 ])
 
 load(
@@ -34,16 +34,16 @@ load(
 
 rust_library(
     name = "tokio_timer",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__crossbeam_utils__0_7_2//:crossbeam_utils",
         "@raze__futures__0_1_29//:futures",
         "@raze__slab__0_4_2//:slab",
         "@raze__tokio_executor__0_1_10//:tokio_executor",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

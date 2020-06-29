@@ -12,7 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "BSD-3-Clause"
+  "notice", # BSD-3-Clause from expression "BSD-3-Clause"
 ])
 
 load(
@@ -26,14 +26,14 @@ load(
 
 rust_library(
     name = "fuchsia_zircon",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__bitflags__1_2_1//:bitflags",
         "@raze__fuchsia_zircon_sys__0_3_3//:fuchsia_zircon_sys",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],

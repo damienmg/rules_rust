@@ -12,8 +12,7 @@ package(default_visibility = [
 ])
 
 licenses([
-  "notice", # "MIT"
-  "restricted", # "Apache-2.0 AND BSD-2-Clause"
+  "notice", # MIT from expression "MIT OR (Apache-2.0 AND BSD-2-Clause)"
 ])
 
 load(
@@ -28,14 +27,14 @@ load(
 
 rust_library(
     name = "crossbeam_queue",
-    crate_root = "src/lib.rs",
     crate_type = "lib",
-    edition = "2015",
-    srcs = glob(["**/*.rs"]),
     deps = [
         "@raze__cfg_if__0_1_10//:cfg_if",
         "@raze__crossbeam_utils__0_7_2//:crossbeam_utils",
     ],
+    srcs = glob(["**/*.rs"]),
+    crate_root = "src/lib.rs",
+    edition = "2015",
     rustc_flags = [
         "--cap-lints=allow",
     ],
