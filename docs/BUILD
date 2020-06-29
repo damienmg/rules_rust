@@ -15,6 +15,7 @@ bzl_library(
         "@io_bazel_rules_rust//cargo:rules",
         "@io_bazel_rules_rust//proto:rules",
         "@io_bazel_rules_rust//rust:rules",
+        "@io_bazel_rules_rust//wasm_bindgen:rules",
         "@rules_proto//proto:rules",
     ],
 )
@@ -24,6 +25,7 @@ PAGES = {
     "rust_doc": ["rust_doc", "rust_doc_test"],
     "rust_proto": ["rust_proto_toolchain","rust_proto_library", "rust_grpc_library"],
     "rust_bindgen": ["rust_bindgen_toolchain","rust_bindgen_library", "rust_bindgen"],
+    "rust_wasm_bindgen": ["rust_wasm_bindgen_toolchain","rust_wasm_bindgen"],
     "cargo_build_script": ["cargo_build_script"],
 }
 

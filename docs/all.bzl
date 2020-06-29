@@ -22,6 +22,15 @@ load("@io_bazel_rules_rust//bindgen:bindgen.bzl",
 load("@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
     _cargo_build_script = "cargo_build_script",
 )
+load("@io_bazel_rules_rust//wasm_bindgen:wasm_bindgen.bzl",
+    _rust_wasm_bindgen = "rust_wasm_bindgen",
+    _rust_wasm_bindgen_toolchain = "rust_wasm_bindgen_toolchain",
+)
+# rust_wasm_bindgen_repositories depends on raze depedencies which are not worth
+# including.
+# load("@io_bazel_rules_rust//wasm_bindgen:repositories.bzl",
+#     _rust_wasm_bindgen_repositories = "rust_wasm_bindgen_repositories",
+# )
 
 rust_library = _rust_library
 rust_binary = _rust_binary
@@ -41,3 +50,9 @@ rust_toolchain = _rust_toolchain
 rust_proto_toolchain = _rust_proto_toolchain
 
 cargo_build_script = _cargo_build_script
+
+rust_wasm_bindgen = _rust_wasm_bindgen
+rust_wasm_bindgen_toolchain = _rust_wasm_bindgen_toolchain
+# rust_wasm_bindgen_repositories depends on raze depedencies which are not worth
+# including.
+# rust_wasm_bindgen_repositories = _rust_wasm_bindgen_repositories
