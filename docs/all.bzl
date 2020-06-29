@@ -19,6 +19,9 @@ load("@io_bazel_rules_rust//bindgen:bindgen.bzl",
     _rust_bindgen = "rust_bindgen",
     _rust_bindgen_library = "rust_bindgen_library",
 )
+load("@io_bazel_rules_rust//cargo:cargo_build_script.bzl",
+    _cargo_build_script = "cargo_build_script",
+)
 
 rust_library = _rust_library
 rust_binary = _rust_binary
@@ -36,3 +39,5 @@ rust_bindgen_library = _rust_bindgen_library
 
 rust_toolchain = _rust_toolchain
 rust_proto_toolchain = _rust_proto_toolchain
+
+cargo_build_script = _cargo_build_script

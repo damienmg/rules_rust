@@ -24,6 +24,7 @@ PAGES = {
     "rust_doc": ["rust_doc", "rust_doc_test"],
     "rust_proto": ["rust_proto_toolchain","rust_proto_library", "rust_grpc_library"],
     "rust_bindgen": ["rust_bindgen_toolchain","rust_bindgen_library", "rust_bindgen"],
+    "cargo_build_script": ["cargo_build_script"],
 }
 
 [
