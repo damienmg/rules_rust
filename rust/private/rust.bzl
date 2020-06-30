@@ -357,7 +357,7 @@ _rust_common_attrs = {
         default = "0.0.0",
     ),
     "out_dir_tar": attr.label(
-        doc = "__Deprecated__, do not use, refers to [#cargo_build_script] instead.",
+        doc = "__Deprecated__, do not use, see [#cargo_build_script] instead.",
         allow_single_file = [
             ".tar",
             ".tar.gz",
