@@ -47,9 +47,15 @@ tasks:
     working_directory: examples
     test_targets:
     - //...
-  docs:
+  docs_linux:
     name: Docs
     platform: ubuntu1804
+    working_directory: docs
+    build_targets:
+    - //...
+  docs_macos:
+    name: Docs
+    platform: macos
     working_directory: docs
     build_targets:
     - //...
