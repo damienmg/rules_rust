@@ -32,6 +32,8 @@ rust_proto_repositories()
 bazel_version(name = "bazel_version")
 stardoc_repositories()
 
+# Rules proto does not declare a bzl_library, we stub it there for now.
+# TODO: Remove this hack if/when rules_proto adds a bzl_library.
 local_repository(
     name = "rules_proto",
     path = "rules_proto_stub",
