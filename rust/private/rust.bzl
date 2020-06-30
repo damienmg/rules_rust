@@ -50,7 +50,10 @@ def _determine_output_hash(lib_rs):
 
 def _deprecated_attributes(ctx):
     if getattr(ctx.attr, "out_dir_tar", None):
-        fail(ctx, "`out_dir_tar` is deprecated, please use cargo/cargo_build_script.bzl instead.")
+        fail(ctx, "".join([
+            "`out_dir_tar` is no longer supported, please use cargo/cargo_build_script.bzl ",
+            "instead. If you used `cargo raze`, please use version 0.3.3 or later.",
+        ]))
 
 def _determine_lib_name(name, crate_type, toolchain, lib_hash = ""):
     extension = None
