@@ -116,7 +116,7 @@ _build_script_run = rule(
             doc = "The binary script to run, generally a rust_binary target. ",
         ),
         "build_script_env": attr.string_dict(
-            doc = "Extraneous environment variables.",
+            doc = "Environment variables for build scripts.",
         ),
         "crate_name": attr.string(),
         "crate_features": attr.string_list(doc = "The list of rust features that the build script should consider activated."),
@@ -176,7 +176,7 @@ def cargo_build_script(name,
         srcs = ["build.rs"],
         # Data are shipped during execution.
         data = ["src/lib.rs"],
-        # Extraneous environment variables passed during build.rs execution
+        # Environment variables passed during build.rs execution
         build_script_env = {"CARGO_PKG_VERSION": "0.1.2"},
     )
 
